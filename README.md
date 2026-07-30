@@ -1,10 +1,10 @@
-# DevMarket 🚀
+# DriverClub
 
 Uma plataforma robusta para gestão de mercado e serviços, focada em escalabilidade e performance.
 
 ## 📌 Sobre o Projeto
 
-O **DevMarket** é um ecossistema completo desenvolvido para conectar motoristas, usuários e gerenciar pagamentos, localizações e corridas em tempo real. O backend é construído com Node.js, utilizando uma arquitetura modular para facilitar a manutenção e evolução do sistema.
+O **DriverClub** é um ecossistema completo desenvolvido para conectar motoristas, usuários e gerenciar pagamentos, localizações e corridas em tempo real. O backend é construído com Node.js, utilizando uma arquitetura modular para facilitar a manutenção e evolução do sistema.
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -46,7 +46,7 @@ backend/
    ```
 2. Acesse a pasta do backend:
    ```bash
-   cd DevMarket/backend
+   cd DriverClub/backend
    ```
 3. Instale as dependências:
    ```bash
@@ -67,4 +67,4 @@ backend/
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE.md](../LICENSE.md) para detalhes.
 
 ---
-Desenvolvido por [Marcio Vinicius](https://github.com/seu-usuario)
+Desenvolvido por [Marcio Vinicius](https://github.com/Developer-Vini)
