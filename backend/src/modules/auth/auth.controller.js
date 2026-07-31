@@ -1,4 +1,4 @@
-const { registrarUsuario } = require('./auth.service');
+const { registrarUsuario, autenticarUsuario } = require('./auth.service');
 
 async function register(req, res) {
     try {
@@ -16,4 +16,20 @@ async function register(req, res) {
     }
 }
 
-module.exports = { register };
+async function login(req, res){
+    try{
+        const { email, password } = req.body;
+
+        if (!email || !password ) {
+            return res.status(400).json({ erro: "Email e senha são obrigatórios" });
+        }
+
+        const resultado = await autenticarUsuario({ email, password });
+
+        return res.status(200).json(resultado);
+    }catch(err){
+        return res.status(401).json({ erro: err.message });
+    }
+}
+
+module.exports = { register, login };
