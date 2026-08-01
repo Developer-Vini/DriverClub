@@ -10,13 +10,17 @@ export const shorthands = undefined;
  */
 export const up = (pgm) => {
     pgm.createTable('drivers', {
-        id: 'id',
+        id: {
+            type: 'uuid',
+            primaryKey: true,
+            default: pgm.func('gen_random_uuid()'),
+        },
         user_id: {
-            type: 'integer',
+            type: 'uuid',
             notNull: true,
             unique: true,
             references: 'users',
-            onDelete: 'CASCADE'
+            onDelete: 'cascade',
         },
         license_plate: {
             type: 'varchar(10)',
@@ -24,7 +28,7 @@ export const up = (pgm) => {
             unique: true
         },
         vehicle_model: {
-            type: 'varchar(100)', 
+            type: 'varchar(100)',
             notNull: true,
         },
         driver_license_number: {
@@ -33,7 +37,7 @@ export const up = (pgm) => {
             unique: true,
         },
         approval_status: {
-            type: 'varchar(20)', 
+            type: 'varchar(20)',
             notNull: true,
             default: 'pending',
         },

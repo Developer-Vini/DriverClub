@@ -10,7 +10,11 @@ export const shorthands = undefined;
  */
 export const up = (pgm) => {
     pgm.createTable('users', {
-        id: 'id',
+        id: {
+            type: 'uuid',
+            primaryKey: true,
+            default: pgm.func('gen_random_uuid()'),
+        },
         name: {
             type: 'varchar(150)',
             notNull: true,
