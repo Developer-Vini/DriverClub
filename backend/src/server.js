@@ -18,11 +18,11 @@ app.use('/drivers', driversRoutes);
 const PORT = process.env.PORT || 3333;
 
 async function iniciarServidor() {
-  await conectarRedis();
+    await conectarRedis();
 
-  servidorHttp.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
-  });
+    servidorHttp.listen(PORT, () => {
+        console.log(`Servidor rodando na porta ${PORT}`);
+    });
 }
 
 iniciarServidor();
