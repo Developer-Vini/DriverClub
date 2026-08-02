@@ -5,6 +5,7 @@ const authRoutes = require('./modules/auth/auth.routes');
 const driversRoutes = require('./modules/drivers/drivers.routes');
 const configurarSocket = require('./websocket/socket');
 const { conectarRedis } = require('./config/redis');
+const { limparMotoristasInativos } = require('./modules/location/location.service');
 
 const app = express();
 const servidorHttp = http.createServer(app);
@@ -16,6 +17,7 @@ app.use('/auth', authRoutes);
 app.use('/drivers', driversRoutes);
 
 const PORT = process.env.PORT || 3333;
+const INTERVALO_LIMPEZA_MS = 15000;
 
 async function iniciarServidor() {
     await conectarRedis();
@@ -23,6 +25,8 @@ async function iniciarServidor() {
     servidorHttp.listen(PORT, () => {
         console.log(`Servidor rodando na porta ${PORT}`);
     });
+
+    setInterval(limparMotoristasInativos, INTERVALO_LIMPEZA_MS);
 }
 
 iniciarServidor();
