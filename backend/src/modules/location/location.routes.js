@@ -4,6 +4,6 @@ const autenticar = require('../../shared/middlewares/auth.middleware');
 const router = express.Router();
 
 
-router.get('nearby', autenticar, buscarProximos)
+router.get('/nearby', autenticar, buscarProximos)
 
 module.exports = router
