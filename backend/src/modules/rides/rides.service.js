@@ -1,4 +1,5 @@
 const pool = require('../../config/database');
+const { emitirParaUsuario } = require('../../websocket/socketState');
 const { podeTransicionar } = require('./ride.stateMachine');
 
 async function solicitarCorrida({ passengerId, originLat, originLng, destinationLat, destinationLng }) {
@@ -48,16 +49,19 @@ async function aceitarCorrida({ rideId, userId }) {
 
     const resultado = await pool.query(
         `UPDATE rides SET status = 'accepted', driver_id = $1, accepted_at = now()
-        WHERE id = $2 AND status = $3
-        RETURNING id, status, driver_id, accepted_at`,
-        [driverId, rideId, corrida.status]
+     WHERE id = $2
+     RETURNING id, status, driver_id, passenger_id, accepted_at`,
+        [driverId, rideId]
     );
 
-    if (resultado.rowCount === 0) {
-        throw new Error('A corrida já mudou de status ou foi aceita por outro motorista.');
-    }
+    const corridaAtualizada = resultado.rows[0];
 
-    return resultado.rows[0];
+    emitirParaUsuario(corridaAtualizada.passenger_id, 'ride_status_changed', {
+        rideId: corridaAtualizada.id,
+        status: corridaAtualizada.status,
+    });
+
+    return corridaAtualizada;
 }
 
 async function marcarChegada({ rideId, userId }) {
@@ -73,13 +77,19 @@ async function marcarChegada({ rideId, userId }) {
     }
 
     const resultado = await pool.query(
-        `UPDATE rides SET status = 'arrived' WHERE id = $1 RETURNING id, status`,
+        `UPDATE rides SET status = 'arrived' WHERE id = $1 RETURNING id, status, passenger_id`,
         [rideId]
     );
 
-    return resultado.rows[0];
-}
+    const corridaAtualizada = resultado.rows[0];
 
+    emitirParaUsuario(corridaAtualizada.passenger_id, 'ride_status_changed', {
+        rideId: corridaAtualizada.id,
+        status: corridaAtualizada.status,
+    });
+
+    return corridaAtualizada;
+}
 async function iniciarCorrida({ rideId, userId }) {
     const driverId = await buscarDriverIdPorUserId(userId);
     const corrida = await buscarCorridaPorId(rideId);
@@ -93,11 +103,18 @@ async function iniciarCorrida({ rideId, userId }) {
     }
 
     const resultado = await pool.query(
-        `UPDATE rides SET status = 'in_progress' WHERE id = $1 RETURNING id, status`,
+        `UPDATE rides SET status = 'in_progress' WHERE id = $1 RETURNING id, status, passenger_id`,
         [rideId]
     );
 
-    return resultado.rows[0];
+    const corridaAtualizada = resultado.rows[0];
+
+    emitirParaUsuario(corridaAtualizada.passenger_id, 'ride_status_changed', {
+        rideId: corridaAtualizada.id,
+        status: corridaAtualizada.status,
+    });
+
+    return corridaAtualizada;
 }
 
 async function finalizarCorrida({ rideId, userId }) {
@@ -114,11 +131,18 @@ async function finalizarCorrida({ rideId, userId }) {
 
     const resultado = await pool.query(
         `UPDATE rides SET status = 'completed', completed_at = now() WHERE id = $1 
-     RETURNING id, status, completed_at`,
+     RETURNING id, status, completed_at, passenger_id`,
         [rideId]
     );
 
-    return resultado.rows[0];
+    const corridaAtualizada = resultado.rows[0];
+
+    emitirParaUsuario(corridaAtualizada.passenger_id, 'ride_status_changed', {
+        rideId: corridaAtualizada.id,
+        status: corridaAtualizada.status,
+    });
+
+    return corridaAtualizada;
 }
 
 async function cancelarCorrida({ rideId, userId, papel }) {
@@ -138,11 +162,32 @@ async function cancelarCorrida({ rideId, userId, papel }) {
     }
 
     const resultado = await pool.query(
-        `UPDATE rides SET status = 'cancelled' WHERE id = $1 RETURNING id, status`,
+        `UPDATE rides SET status = 'cancelled' WHERE id = $1 RETURNING id, status, passenger_id, driver_id`,
         [rideId]
     );
 
-    return resultado.rows[0];
+    const corridaAtualizada = resultado.rows[0];
+
+    if (papel === 'driver') {
+        emitirParaUsuario(corridaAtualizada.passenger_id, 'ride_status_changed', {
+            rideId: corridaAtualizada.id,
+            status: corridaAtualizada.status,
+        });
+    }
+
+    if (papel === 'passenger' && corridaAtualizada.driver_id) {
+        const resultadoUser = await pool.query('SELECT user_id FROM drivers WHERE id = $1', [corridaAtualizada.driver_id]);
+        const driverUserId = resultadoUser.rows[0]?.user_id;
+
+        if (driverUserId) {
+            emitirParaUsuario(driverUserId, 'ride_status_changed', {
+                rideId: corridaAtualizada.id,
+                status: corridaAtualizada.status,
+            });
+        }
+    }
+
+    return corridaAtualizada;
 }
 
 module.exports = {

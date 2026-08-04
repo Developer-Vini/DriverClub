@@ -8,11 +8,12 @@ const { conectarRedis } = require('./config/redis');
 const { limparMotoristasInativos } = require('./modules/location/location.service');
 const ridesRoutes = require('./modules/rides/rides.routes'); 
 const locationRoutes = require('./modules/location/location.routes');
+const { definirInstancia } = require('./websocket/socketState');
 
 const app = express();
 const servidorHttp = http.createServer(app);
-
-configurarSocket(servidorHttp);
+const { io, usuariosConectados } = configurarSocket(servidorHttp);
+definirInstancia(io, usuariosConectados)
 
 app.use(express.json());
 app.use('/auth', authRoutes);

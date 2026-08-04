@@ -2,6 +2,8 @@ const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const { atualizarLocalizacaoMotorista, removerMotoristaDoMapa } = require('../modules/location/location.service');
 
+const usuariosConectados = new Map();
+
 function configurarSocket(servidorHttp) {
     const io = new Server(servidorHttp, {
         cors: {
@@ -28,6 +30,8 @@ function configurarSocket(servidorHttp) {
     io.on('connection', (socket) => {
         console.log('Novo cliente conectado:', socket.id, '- usuário:', socket.usuario.id);
 
+        usuariosConectados.set(socket.usuario.id, socket.id)
+
         socket.on('atualizar_localizacao', async (dados) => {
             try {
                 const { lat, lng } = dados;
@@ -49,6 +53,8 @@ function configurarSocket(servidorHttp) {
         socket.on('disconnect', async () => {
             console.log('Cliente desconectado:', socket.id, '- usuário:', socket.usuario.id);
 
+            usuariosConectados.delete(socket.usuario.id)
+
             if (socket.usuario.role === 'driver') {
                 await removerMotoristaDoMapa(socket.usuario.id);
                 console.log('Motorista removido do mapa geográfico:', socket.usuario.id);
@@ -56,7 +62,7 @@ function configurarSocket(servidorHttp) {
         });
     });
 
-    return io;
+    return { io, usuariosConectados };
 }
 
 module.exports = configurarSocket;
