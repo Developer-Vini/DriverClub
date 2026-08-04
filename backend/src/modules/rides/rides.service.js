@@ -1,47 +1,156 @@
 const pool = require('../../config/database');
-const { podeTransicionar } = require('./ride.stateMachine')
+const { podeTransicionar } = require('./ride.stateMachine');
 
 async function solicitarCorrida({ passengerId, originLat, originLng, destinationLat, destinationLng }) {
     const resultado = await pool.query(
         `INSERT INTO rides (passenger_id, origin, destination)
-        VALUES (
-        $1,
-        ST_SetSRID(ST_MakePoint($2, $3), 4326)::geography,
-        ST_SetSRID(ST_MakePoint($4, $5), 4326)::geography
-        )
-        RETURNING id, passenger_id, status, requested_at`,
+     VALUES (
+       $1,
+       ST_SetSRID(ST_MakePoint($2, $3), 4326)::geography,
+       ST_SetSRID(ST_MakePoint($4, $5), 4326)::geography
+     )
+     RETURNING id, passenger_id, status, requested_at`,
         [passengerId, originLng, originLat, destinationLng, destinationLat]
     );
 
     return resultado.rows[0];
 }
 
-async function aceitarCorrida({ rideId, driverId }) {
-    const resultadoCorrida = await pool.query(
-        'SELECT id, status FROM rides WHERE id = $1',
-        [rideId]
-    );
+async function buscarDriverIdPorUserId(userId) {
+    const resultado = await pool.query('SELECT id FROM drivers WHERE user_id = $1', [userId]);
+    const motorista = resultado.rows[0];
 
-    const corrida = resultadoCorrida.rows[0];
+    if (!motorista) {
+        throw new Error('Perfil de motorista não encontrado. Complete seu cadastro primeiro.');
+    }
+
+    return motorista.id;
+}
+
+async function buscarCorridaPorId(rideId) {
+    const resultado = await pool.query('SELECT * FROM rides WHERE id = $1', [rideId]);
+    const corrida = resultado.rows[0];
 
     if (!corrida) {
         throw new Error('Corrida não encontrada');
     }
 
-    const podeAceitar = podeTransicionar(corrida.status, 'accepted', 'driver');
+    return corrida;
+}
 
-    if (!podeAceitar) {
-        throw new Error(`Não é possivel aceitar uma corrida no estado "${corrida.status}`);
+async function aceitarCorrida({ rideId, userId }) {
+    const driverId = await buscarDriverIdPorUserId(userId);
+    const corrida = await buscarCorridaPorId(rideId);
+
+    if (!podeTransicionar(corrida.status, 'accepted', 'driver')) {
+        throw new Error(`Não é possível aceitar uma corrida no estado "${corrida.status}"`);
     }
 
     const resultado = await pool.query(
-        `UPDATE rides 
-        SET status = 'accepted', driver_id = $1, accepted_at = now()
-        WHERE id = $2
+        `UPDATE rides SET status = 'accepted', driver_id = $1, accepted_at = now()
+        WHERE id = $2 AND status = $3
         RETURNING id, status, driver_id, accepted_at`,
-        [driverId, rideId]
+        [driverId, rideId, corrida.status]
+    );
+
+    if (resultado.rowCount === 0) {
+        throw new Error('A corrida já mudou de status ou foi aceita por outro motorista.');
+    }
+
+    return resultado.rows[0];
+}
+
+async function marcarChegada({ rideId, userId }) {
+    const driverId = await buscarDriverIdPorUserId(userId);
+    const corrida = await buscarCorridaPorId(rideId);
+
+    if (corrida.driver_id !== driverId) {
+        throw new Error('Você não é o motorista responsável por esta corrida');
+    }
+
+    if (!podeTransicionar(corrida.status, 'arrived', 'driver')) {
+        throw new Error(`Não é possível marcar chegada no estado "${corrida.status}"`);
+    }
+
+    const resultado = await pool.query(
+        `UPDATE rides SET status = 'arrived' WHERE id = $1 RETURNING id, status`,
+        [rideId]
     );
 
     return resultado.rows[0];
 }
-module.exports = { solicitarCorrida, aceitarCorrida }
+
+async function iniciarCorrida({ rideId, userId }) {
+    const driverId = await buscarDriverIdPorUserId(userId);
+    const corrida = await buscarCorridaPorId(rideId);
+
+    if (corrida.driver_id !== driverId) {
+        throw new Error('Você não é o motorista responsável por esta corrida');
+    }
+
+    if (!podeTransicionar(corrida.status, 'in_progress', 'driver')) {
+        throw new Error(`Não é possível iniciar a corrida no estado "${corrida.status}"`);
+    }
+
+    const resultado = await pool.query(
+        `UPDATE rides SET status = 'in_progress' WHERE id = $1 RETURNING id, status`,
+        [rideId]
+    );
+
+    return resultado.rows[0];
+}
+
+async function finalizarCorrida({ rideId, userId }) {
+    const driverId = await buscarDriverIdPorUserId(userId);
+    const corrida = await buscarCorridaPorId(rideId);
+
+    if (corrida.driver_id !== driverId) {
+        throw new Error('Você não é o motorista responsável por esta corrida');
+    }
+
+    if (!podeTransicionar(corrida.status, 'completed', 'driver')) {
+        throw new Error(`Não é possível finalizar a corrida no estado "${corrida.status}"`);
+    }
+
+    const resultado = await pool.query(
+        `UPDATE rides SET status = 'completed', completed_at = now() WHERE id = $1 
+     RETURNING id, status, completed_at`,
+        [rideId]
+    );
+
+    return resultado.rows[0];
+}
+
+async function cancelarCorrida({ rideId, userId, papel }) {
+    const corrida = await buscarCorridaPorId(rideId);
+
+    if (papel === 'passenger' && corrida.passenger_id !== userId) {
+        throw new Error('Não autorizado.');
+    }
+
+    if (papel === 'driver') {
+        const driverId = await buscarDriverIdPorUserId(userId);
+        if (corrida.driver_id !== driverId) throw new Error('Não autorizado.');
+    }
+
+    if (!podeTransicionar(corrida.status, 'cancelled', papel)) {
+        throw new Error(`Não é possível cancelar a corrida no estado "${corrida.status}"`);
+    }
+
+    const resultado = await pool.query(
+        `UPDATE rides SET status = 'cancelled' WHERE id = $1 RETURNING id, status`,
+        [rideId]
+    );
+
+    return resultado.rows[0];
+}
+
+module.exports = {
+    solicitarCorrida,
+    aceitarCorrida,
+    marcarChegada,
+    iniciarCorrida,
+    finalizarCorrida,
+    cancelarCorrida,
+    buscarCorridaPorId,
+};
