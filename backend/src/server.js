@@ -6,6 +6,7 @@ const driversRoutes = require('./modules/drivers/drivers.routes');
 const configurarSocket = require('./websocket/socket');
 const { conectarRedis } = require('./config/redis');
 const { limparMotoristasInativos } = require('./modules/location/location.service');
+const ridesRoutes = require('./modules/rides/rides.routes'); 
 const locationRoutes = require('./modules/location/location.routes');
 
 const app = express();
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/drivers', driversRoutes);
 app.use('/location', locationRoutes);
+app.use('/rides', ridesRoutes);
 
 const PORT = process.env.PORT || 3333;
 const INTERVALO_LIMPEZA_MS = 15000;

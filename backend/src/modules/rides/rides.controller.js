@@ -9,7 +9,7 @@ async function solicitar(req, res){
         }
 
         const corrida = await solicitarCorrida({
-            passangerId: req.usuario.id,
+            passengerId: req.usuario.id,
             originLat,
             originLng,
             destinationLat,
