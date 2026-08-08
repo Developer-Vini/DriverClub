@@ -8,9 +8,7 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
-.claude
-AGENTS.md
-CLAUDE.md
+
 # Native
 .kotlin/
 *.orig.*
@@ -37,8 +35,6 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
-
-example
 
 # generated native folders
 /ios
