@@ -1,21 +1,16 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { styles } from '../css/HomeScreenStyle';
+
 
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.titulo}>Uber Clone - Passageiro</Text>
+
+      <TouchableOpacity style={styles.botao} onPress={() => router.push('login')}>
+        <Text style={styles.textoBotao}>Ir para Login</Text>
+      </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  titulo: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-});
