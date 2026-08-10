@@ -2,9 +2,10 @@ import { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { router } from 'expo-router';
 import { register } from '../services/authService';
+import { styles } from '../css/loginStyle'
 
 export default function RegisterScreen() {
-    const [username, setUsername]
+    const [name, setName] = useState('')
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [phone, setPhone] = useState('');
@@ -12,34 +13,36 @@ export default function RegisterScreen() {
     const [carregando, setCarregando] = useState(false);
 
     async function handleRegister() {
-        if (!email || !password || !phone || !role || !username) {
+        if (!email || !password || !phone || !role || !name) {
             Alert.alert('Erro', "Preencha todos os campos");
             return;
         }
-    }
-    setCarregando(true);
+        setCarregando(true);
 
-    try {
-        const resultado = await register(username, email, password, phone);
+        try {
+            const resultado = await register({name, email, password, phone, role: 'passenger'});
 
-        console.log('Usuario cadastrado com sucesso', resultado);
-    } catch (erro) {
-        console.log('Erro no cadastro:', erro.message);
-        Alert.alert('Erro', 'Erro ao cadastrar usuario');
-    } finally {
-        setCarregando(false)
+            console.log('Usuario cadastrado com sucesso', resultado);
+            Alert.alert('Sucesso', 'Cadastro realizado!! Faça login para continuar.');
+            router.push('/login')
+        } catch (erro) {
+            console.log('Erro no cadastro:', erro.message);
+            Alert.alert('Erro', 'Não foi possivel cadastrar. Tente novamente');
+        } finally {
+            setCarregando(false)
+        }
     }
 
     return (
         <View style={styles.container}>
-            <Text style={styles.titulo}>Entrar</Text>
+            <Text style={styles.titulo}>Criar Conta</Text>
 
 
             <TextInput
                 style={styles.input}
-                placeholder='none'
-                value={username}
-                onChangeText={setUsername}
+                placeholder='Nome'
+                value={name}
+                onChangeText={setName}
             />
 
 
@@ -53,7 +56,7 @@ export default function RegisterScreen() {
 
             <TextInput
                 style={styles.input}
-                placeholder='Email'
+                placeholder='Telefone'
                 value={email}
                 onChangeText={setEmail}
                 keyboardType='email-address'
@@ -67,7 +70,7 @@ export default function RegisterScreen() {
                 secureTextEntry
             />
             <TouchableOpacity style={styles.botao} onPress={handleLogin} disabled={carregando}>
-                <Text style={styles.textoBotao}>{carregando ? 'Entrando' : 'Entrar'}</Text>
+                <Text style={styles.textoBotao}>{carregando ? 'Cadastrando' : 'Cadastrar'}</Text>
             </TouchableOpacity>
         </View>
     )
