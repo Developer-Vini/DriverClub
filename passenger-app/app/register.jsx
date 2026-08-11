@@ -9,7 +9,7 @@ export default function RegisterScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [phone, setPhone] = useState('');
-    const [role, setRole] = useState('');
+    const [role, setRole] = useState('passenger');
     const [carregando, setCarregando] = useState(false);
 
     async function handleRegister() {
@@ -20,7 +20,7 @@ export default function RegisterScreen() {
         setCarregando(true);
 
         try {
-            const resultado = await register({name, email, password, phone, role: 'passenger'});
+            const resultado = await register({ name, email, password, phone, role: 'passenger' });
 
             console.log('Usuario cadastrado com sucesso', resultado);
             Alert.alert('Sucesso', 'Cadastro realizado!! Faça login para continuar.');
@@ -57,9 +57,9 @@ export default function RegisterScreen() {
             <TextInput
                 style={styles.input}
                 placeholder='Telefone'
-                value={email}
-                onChangeText={setEmail}
-                keyboardType='email-address'
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType='phone-pad'
             />
 
             <TextInput
@@ -69,7 +69,7 @@ export default function RegisterScreen() {
                 onChangeText={setPassword}
                 secureTextEntry
             />
-            <TouchableOpacity style={styles.botao} onPress={handleLogin} disabled={carregando}>
+            <TouchableOpacity style={styles.botao} onPress={handleRegister} disabled={carregando}>
                 <Text style={styles.textoBotao}>{carregando ? 'Cadastrando' : 'Cadastrar'}</Text>
             </TouchableOpacity>
         </View>

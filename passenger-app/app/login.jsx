@@ -52,6 +52,9 @@ export default function LoginScreen() {
             <TouchableOpacity style={styles.botao} onPress={handleLogin} disabled={carregando}>
                 <Text style={styles.textoBotao}>{carregando ? 'Entrando' : 'Entrar'}</Text>
             </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/register')} style={{ marginTop: 16 }}>
+                <Text style={{ textAlign: 'center' }}>Não tem conta? Cadastre-se</Text>
+            </TouchableOpacity>
         </View>
     )
 }
