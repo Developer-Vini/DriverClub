@@ -1,70 +1,68 @@
 # DriverClub
 
-Uma plataforma robusta para gestão de mercado e serviços, focada em escalabilidade e performance.
+A robusta platform for market and service management, focused on scalability and performance.
 
-## 📌 Sobre o Projeto
+## 📌 About the Project
 
-O **DriverClub** é um ecossistema completo desenvolvido para conectar motoristas, usuários e gerenciar pagamentos, localizações e corridas em tempo real. O backend é construído com Node.js, utilizando uma arquitetura modular para facilitar a manutenção e evolução do sistema.
+**DriverClub** is a comprehensive ecosystem designed to connect drivers and users, while managing payments, locations, and trips in real time. The backend is built with Node.js, utilizing a modular architecture to facilitate system maintenance and evolution.
 
-## 🛠️ Tecnologias Utilizadas
+## 🛠️ Technologies Used
 
-- **Node.js**: Ambiente de execução Javascript.
-- **Express**: Framework web para construção da API.
-- **WebSocket**: Comunicação em tempo real para localização e corridas.
-- **PostgreSQL**: Banco de dados relacional.
-- **Migrations**: Controle de versão do banco de dados.
-
-## 📂 Estrutura de Pastas (Backend)
+- **Node.js**: JavaScript runtime environment.
+- **Express**: Web framework for building the API.
+- **WebSocket**: Real-time communication for location tracking and trips.
+- **PostgreSQL**: Relational database.
+- **Migrations**: Database version control. ## 📂 Folder Structure (Backend)
 
 ```text
 backend/
 ├── src/
-│   ├── config/          # Configurações de banco de dados e variáveis
-│   ├── modules/         # Módulos principais do sistema
-│   │   ├── auth/        # Autenticação e Autorização
-│   │   ├── drivers/     # Gestão de Motoristas
-│   │   ├── location/    # Serviços de Geolocalização
-│   │   ├── payments/    # Processamento de Pagamentos
-│   │   ├── rides/       # Gestão de Corridas
-│   │   └── users/       # Gestão de Usuários
-│   ├── shared/          # Código compartilhado entre módulos
-│   └── websocket/       # Lógica de comunicação Socket.io/WS
-├── migrations/          # Scripts de alteração do banco de dados
+│   ├── config/          # Database configurations and variables
+│   ├── modules/         # Core system modules
+│   │   ├── auth/        # Authentication and Authorization
+│   │   ├── drivers/     # Driver Management
+│   │   ├── location/    # Geolocation Services
+│   │   ├── payments/    # Payment Processing
+│   │   ├── rides/       # Ride Management
+│   │   └── users/       # User Management
+│   ├── shared/          # Code shared across modules
+│   └── websocket/       # Socket.io/WS communication logic
+├── migrations/          # Database schema migration scripts
 └── ...
 ```
 
-## 🚀 Como Executar
+## 🚀 How to Run
 
-### Pré-requisitos
-- Node.js instalado (v16+)
-- PostgreSQL rodando
+### Prerequisites
+- Node.js installed (v16+)
+- PostgreSQL running
 
-### Instalação
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/seu-usuario/DriverClub.git
-   ```
-2. Acesse a pasta do backend:
-   ```bash
-   cd DriverClub/backend
-   ```
-3. Instale as dependências:
-   ```bash
-   npm install
-   ```
-4. Configure o arquivo `.env` com suas credenciais do banco de dados.
-5. Rode as migrations:
-   ```bash
-   npm run migrate (ou o comando configurado)
-   ```
-6. Inicie o servidor:
-   ```bash
-   npm run dev
-   ```
+### Installation
+1. Clone the repository:
+```bash
+git clone https://github.com/your-username/DriverClub.git
+```
+2. Navigate to the backend folder:
+```bash
+cd DriverClub/backend
+```
+3. Install dependencies:
+```bash
+npm install
+```
+4. Configure the `.env` file with your database credentials.
+5. Run the migrations:
+```bash
+npm run migrate (or the configured command)
+```
+6. Start the server:
+```bash
+npm run dev
+```
 
-## 📝 Licença
+## 📝 License
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE.md](../LICENSE.md) para detalhes.
+This project is licensed under the MIT License. See the [LICENSE.md](../LICENSE.md) file for details.
 
 ---
-Desenvolvido por [Marcio Vinicius](https://github.com/Developer-Vini)
+Developed by [Marcio Vinicius](https://github.com/Developer-Vini)
